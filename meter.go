@@ -5,18 +5,16 @@ import (
 	"time"
 )
 
-// NewMeter creates new Meter instance.
 func NewMeter(limit, maxObjects int64) *Meter {
 	meter := NewMeterVal[struct{}](limit, maxObjects)
 	return &Meter{
-		Locker: &meter.Mutex,
+		Locker: &meter.RWMutex,
 		meter:  meter,
 	}
 }
 
-// Meter is speed meter that is not accepts any value.
 type Meter struct {
-	Locker *sync.Mutex
+	Locker *sync.RWMutex
 	meter  *MeterVal[struct{}]
 }
 
@@ -42,7 +40,22 @@ func (meter *Meter) ObjectsUnsafe(n time.Duration) (objects int) {
 	return len(meter.meter.ObjectsUnsafe(n))
 }
 
+// ObjectsLen ...
+func (meter *Meter) ObjectsLen(n time.Duration) int {
+	return meter.meter.ObjectsLen(n)
+}
+
+// ObjectsLenUnsafe ...
+func (meter *Meter) ObjectsLenUnsafe(n time.Duration) (objects int) {
+	return meter.meter.ObjectsLenUnsafe(n)
+}
+
 // LimitExceeded ...
 func (meter *Meter) LimitExceeded(n time.Duration) bool {
 	return meter.meter.LimitExceeded(n)
+}
+
+// LimitExceededUnsafe ...
+func (meter *Meter) LimitExceededUnsafe(n time.Duration) bool {
+	return meter.meter.LimitExceededUnsafe(n)
 }
